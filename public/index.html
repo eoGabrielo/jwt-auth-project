@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Autenticação JWT</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+  <form id="registerForm" class="active">
+    <h2>Cadastros</h2>
+    <input type="email" id="registerEmail" placeholder="Email" required />
+    <input type="password" id="registerPassword" placeholder="Senha" required minlength="4" />
+    <button type="submit">Cadastrar</button>
+    <div class="message" id="registerMessage"></div>
+    <div class="toggle" id="showLogin">Já tem uma conta?<br>Faça Login</div>
+  </form>
+
+  <form id="loginForm">
+    <h2>Login</h2>
+    <input type="email" id="loginEmail" placeholder="Email" required />
+    <input type="password" id="loginPassword" placeholder="Senha" required minlength="4" />
+    <button type="submit">Entrar</button>
+    <div class="message" id="loginMessage"></div>
+    <div class="toggle" id="showRegister">Não tem conta?<br>Cadastre-se</div>
+  </form>
+
+</div>
+
+<script>
+  // Seleciona elementos
+  const registerForm = document.getElementById('registerForm');
+  const loginForm = document.getElementById('loginForm');
+
+  const registerMessage = document.getElementById('registerMessage');
+  const loginMessage = document.getElementById('loginMessage')
+ 
+
+  // Alternar para login
+  document.getElementById('showLogin').addEventListener('click', () => {
+    registerForm.classList.remove('active');
+    loginForm.classList.add('active');
+    clearMessages();
+  });
+
+  // Alternar para cadastro
+   document.getElementById('showRegister').addEventListener('click', () => {
+    loginForm.classList.remove('active');
+    registerForm.classList.add('active');
+    clearMessages();
+  });
+
+  // Limpar mensagens
+   function clearMessages() {
+    registerMessage.textContent = '';
+    registerMessage.className = 'message';
+    loginMessage.textContent = '';
+    loginMessage.className = 'message';
+  }
+
+  // Função async para requisição POST com tratamento de resposta
+  async function postData(url = '', data = {}) {//Caso nem um valor for passado, recebe vazio.
+    try{
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(data)
+      });
+      return await response.json(); //retorna a resposta do servidor
+    }catch(error){
+      return {message: 'Erro ao conectar com servidor'}
+    }
+    
+  }
+
+  // Handle Register
+  registerForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearMessages();
+
+    const email = document.getElementById('registerEmail').value.trim();//'.trim()' remove espaços em braco.
+    const password = document.getElementById('registerPassword').value.trim();
+
+  if (!email || !password) {//Se não preencher algum campo dos email ou password
+    registerMessage.textContent = 'Preencha todos os campos.';
+    registerMessage.classList.add('error');
+    return;
+  }
+
+  const data = await postData('http://localhost:3000/auth/register', { email, password });//Requisição de dados do req.body
+
+  if(data.token) {
+      registerMessage.textContent = 'Cadastro realizado com sucesso! Token recebido.';
+      registerMessage.classList.add('success');
+      //Armazenar o token no localStorage/sessionStorage para usar depois.
+      console.log('Token:', data.token);
+    } else {
+      registerMessage.textContent = data.message || 'Erro ao cadastrar.';
+      registerMessage.classList.add('error');
+    }
+  });
+
+  // Handle Login
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearMessages();
+
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+
+    if (!email || !password) {
+      loginMessage.textContent = 'Preencha todos os campos.';
+      loginMessage.classList.add('error');
+      return;
+    }
+
+    const data = await postData('http://localhost:3000/auth/login', { email, password });
+
+    if(data.token) {
+      loginMessage.textContent = 'Login realizado com sucesso! Token recebido.';
+      loginMessage.classList.add('success');
+      // Armazene o token para uso futuro
+      console.log('Token:', data.token);
+    } else {
+      loginMessage.textContent = data.message || 'Erro ao realizar login.';
+      loginMessage.classList.add('error');
+    }
+  });
+</script>
+
+</body>
+</html>
+
+jwt-auth-project
+
