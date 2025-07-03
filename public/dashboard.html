@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Área Protegida</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f3f3f3;
+      text-align: center;
+    }
+    .logout {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #bd3737;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bem-vindo à Área Protegida!</h1>
+  <p>Você só vê isso porque está autenticado.</p>
+  <button class="logout" onclick="logout()">Sair (Remover o Token salvo no localStorage)</button>
+
+  <script>
+
+    async function verificarToken() {
+    const token = localStorage.getItem('authToken');//Pega token do localStage
+
+    if (!token) {//Se não tiver manda pra pagina de cadastro/login
+      window.location.href = '/';
+    }else{
+      console.log('Token existente, pagina liberada: ' + token)
+    }
+  }
+
+  function logout() {
+  localStorage.removeItem('authToken');
+  window.location.reload(); //redirecionar para tela de cadastro/login
+}
+
+
+  // Chamar a função quando a página carregar
+  window.addEventListener('DOMContentLoaded', verificarToken);
+  </script>
+</body>
+</html>
